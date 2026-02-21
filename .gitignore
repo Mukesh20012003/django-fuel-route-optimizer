@@ -1,0 +1,19 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+*.env
+
+# Database
+db.sqlite3
+*.sqlite3
+
+# Migrations (local only)
+**/migrations/0*.py
+
+# IDE
+.vscode/
+.idea/

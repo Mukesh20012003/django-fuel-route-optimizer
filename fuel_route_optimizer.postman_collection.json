@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "Fuel Route Optimizer API",
+    "description": "API collection for the Django Fuel Route Optimizer.\n\nEndpoint: POST /api/route/optimize/\n\nAccepts start/end locations (city strings or coordinates) and returns an optimised fuel-stop plan with route geometry, fuel stops, and total costs.\n\nVehicle defaults: 10 MPG, 500-mile range.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Optimize Route – City Strings",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": { \"query\": \"Dallas, TX\" },\n  \"end\":   { \"query\": \"Atlanta, GA\" }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/route/optimize/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", "optimize", ""]
+        },
+        "description": "Optimize fuel stops for a route using city name strings. The API geocodes the locations automatically via OpenRouteService."
+      },
+      "response": [
+        {
+          "name": "Example – Dallas to Atlanta",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"route\": {\n    \"distance_miles\": 781.3,\n    \"coordinates\": [[-96.797, 32.777], [-95.37, 29.760], [-90.07, 29.951], [-84.39, 33.749]],\n    \"geometry_polyline\": \"\"\n  },\n  \"fuel_stops\": [\n    {\n      \"station_id\": 42,\n      \"name\": \"Circle K #4706716\",\n      \"address\": \"SR-71 & SR-47\",\n      \"city\": \"Shreveport\",\n      \"state\": \"LA\",\n      \"latitude\": 32.513,\n      \"longitude\": -93.747,\n      \"price_per_gallon\": \"3.199\",\n      \"distance_from_start_miles\": 188.5,\n      \"gallons_to_buy\": 50.0,\n      \"cost_at_stop\": 159.95\n    },\n    {\n      \"station_id\": 87,\n      \"name\": \"Pilot #3120\",\n      \"address\": \"I-20 Exit 120\",\n      \"city\": \"Jackson\",\n      \"state\": \"MS\",\n      \"latitude\": 32.299,\n      \"longitude\": -90.185,\n      \"price_per_gallon\": \"3.099\",\n      \"distance_from_start_miles\": 420.1,\n      \"gallons_to_buy\": 50.0,\n      \"cost_at_stop\": 154.95\n    }\n  ],\n  \"total_fuel_gallons\": 100.0,\n  \"total_fuel_cost\": 314.9,\n  \"vehicle_max_range_miles\": 500.0,\n  \"vehicle_mpg\": 10.0\n}"
+        }
+      ]
+    },
+    {
+      "name": "Optimize Route – Raw Coordinates",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": { \"lat\": 32.7767, \"lng\": -96.7970 },\n  \"end\":   { \"lat\": 33.7490, \"lng\": -84.3880 }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/route/optimize/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", "optimize", ""]
+        },
+        "description": "Optimize fuel stops using explicit latitude/longitude coordinates. Skips geocoding and calls the routing API directly."
+      },
+      "response": [
+        {
+          "name": "Example – Coordinates Response",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"route\": {\n    \"distance_miles\": 781.3,\n    \"coordinates\": [[-96.797, 32.777], [-84.39, 33.749]],\n    \"geometry_polyline\": \"\"\n  },\n  \"fuel_stops\": [\n    {\n      \"station_id\": 42,\n      \"name\": \"Circle K #4706716\",\n      \"address\": \"SR-71 & SR-47\",\n      \"city\": \"Shreveport\",\n      \"state\": \"LA\",\n      \"latitude\": 32.513,\n      \"longitude\": -93.747,\n      \"price_per_gallon\": \"3.199\",\n      \"distance_from_start_miles\": 188.5,\n      \"gallons_to_buy\": 50.0,\n      \"cost_at_stop\": 159.95\n    }\n  ],\n  \"total_fuel_gallons\": 50.0,\n  \"total_fuel_cost\": 159.95,\n  \"vehicle_max_range_miles\": 500.0,\n  \"vehicle_mpg\": 10.0\n}"
+        }
+      ]
+    },
+    {
+      "name": "Optimize Route – Invalid Input (missing start)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"end\": { \"query\": \"Atlanta, GA\" }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/route/optimize/",
+          "host": ["{{base_url}}"],
+          "path": ["api", "route", "optimize", ""]
+        },
+        "description": "Example of invalid input – missing 'start' field. Should return 400."
+      },
+      "response": [
+        {
+          "name": "400 – Missing Start",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"errors\": {\n    \"start\": [\"This field is required.\"]\n  }\n}"
+        }
+      ]
+    }
+  ]
+}
